@@ -314,6 +314,14 @@ func (p *PureWindowsPath) JoinPath(segments ...IPurePath) IPurePath {
 	return p.Join(strSegments...) // 调用Join方法
 }
 
+func (p *PureWindowsPath) JoinForFile(path string) IPurePath {
+	return p.Parent().Join(path) // 使用父路径进行组合
+}
+
+func (p *PureWindowsPath) JoinPathForFile(path IPurePath) IPurePath {
+	return p.Parent().JoinPath(path) // 使用父路径进行组合
+}
+
 // 将此路径与pattern完全匹配
 func (p *PureWindowsPath) FullMatch(pattern string, caseSensitive ...bool) bool {
 	cs := common.ParseOptional(caseSensitive, false) // 默认不区分大小写

@@ -37,6 +37,8 @@ type IPurePath interface {
 	Parent() IPurePath
 	Join(segments ...string) IPurePath
 	JoinPath(segments ...IPurePath) IPurePath
+	JoinForFile(path string) IPurePath
+	JoinPathForFile(path IPurePath) IPurePath
 
 	WithAnchor(anchor string) (IPurePath, error)
 	WithParent(parent IPurePath) (IPurePath, error)

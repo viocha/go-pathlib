@@ -12,6 +12,8 @@ type IBasePath interface {
 	Parent() IPath
 	Join(segments ...string) IPath
 	JoinPath(segments ...IPath) IPath
+	JoinForFile(path string) IPath
+	JoinPathForFile(path IPath) IPath
 
 	WithAnchor(anchor string) (IPath, error)
 	WithName(name string) (IPath, error)
@@ -73,6 +75,16 @@ func (p *BasePath) JoinPath(segments ...IPath) IPath {
 		strSegments = append(strSegments, segment.String())
 	}
 	return p.Join(strSegments...)
+}
+
+func (p *BasePath) JoinForFile(path string) IPath {
+	joined := p.IPurePath.JoinForFile(path)
+	return FromPurePath(joined)
+}
+
+func (p *BasePath) JoinPathForFile(path IPath) IPath {
+	joined := p.IPurePath.JoinPathForFile(path.ToPurePath())
+	return FromPurePath(joined)
 }
 
 func (p *BasePath) WithAnchor(anchor string) (IPath, error) {

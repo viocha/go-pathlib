@@ -101,7 +101,7 @@ func (p WindowsPath) ReadLinkPath() (IPath, error) {
 	}
 	// 如果是相对路径，和链接路径进行拼接
 	if !target.IsAbs() {
-		target = p.Parent().Join(target.String())
+		target = p.JoinPathForFile(target)
 	}
 	return target, nil
 }
