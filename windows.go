@@ -85,12 +85,25 @@ func (p WindowsPath) ToAbs() (IPath, error) {
 
 // 读取符号链接的目标路径
 func (p WindowsPath) ReadLink() (IPath, error) {
-	target, err := filepath.EvalSymlinks(p.String())
+	target, err := os.Readlink(p.String())
 	if err != nil {
 		return nil, common.WrapSub(ErrReadLink, err, "failed to read symlink: %q", p)
 	}
 	// 返回一个新的 WindowsPath 实例
 	return NewWindowsPath(target), nil
+}
+
+func (p WindowsPath) ReadLinkPath() (IPath, error) {
+	// 读取符号链接的目标路径
+	target, err := p.ReadLink()
+	if err != nil {
+		return nil, err
+	}
+	// 如果是相对路径，和链接路径进行拼接
+	if !target.IsAbs() {
+		target = p.Parent().Join(target.String())
+	}
+	return target, nil
 }
 
 // 转换成绝对路径，并解析符号链接，返回最终的目标路径
@@ -516,6 +529,14 @@ func (p WindowsPath) MustToAbs() IPath {
 // 返回符号链接的目标路径，如果失败则 panic
 func (p WindowsPath) MustReadLink() IPath {
 	target, err := p.ReadLink()
+	if err != nil {
+		panic(err)
+	}
+	return target
+}
+
+func (p WindowsPath) MustReadLinkPath() IPath {
+	target, err := p.ReadLinkPath()
 	if err != nil {
 		panic(err)
 	}

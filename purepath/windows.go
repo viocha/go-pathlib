@@ -2,7 +2,6 @@ package purepath
 
 import (
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 
@@ -31,7 +30,7 @@ func NewPureWindowsPath(segments ...string) *PureWindowsPath {
 		seg = nt.Clean(seg)               // 规范化每个路径段
 		if strings.HasPrefix(seg, `\\`) { // UNC绝对路径，覆盖前面的路径
 			path = seg
-		} else if regexp.MustCompile(`(?i)^[A-Z]:`).MatchString(seg) { // 以盘符开头的路径
+		} else if nt.RegDrive.MatchString(seg) { // 以盘符开头的路径
 			drive := seg[:2]                     // 提取盘符
 			if len(seg) >= 3 && seg[2] == '\\' { // 有根路径\，为绝对路径
 				path = seg // 直接覆盖
@@ -43,9 +42,8 @@ func NewPureWindowsPath(segments ...string) *PureWindowsPath {
 				}
 			}
 		} else if strings.HasPrefix(seg, `\`) { // 以\开头的绝对路径
-			// 提取前面的盘符
-			reg := regexp.MustCompile(`(?i)^[A-Z]:\\`)
-			if reg.MatchString(path) {
+			// 提取前面的盘符（带有反斜杠）
+			if nt.RegDriveRoot.MatchString(path) {
 				path = path[:2] + seg // 盘符+绝对路径
 			} else {
 				path = seg // 没有盘符，则直接覆盖
@@ -306,6 +304,14 @@ func (p *PureWindowsPath) ToValid() IPurePath {
 func (p *PureWindowsPath) Join(segments ...string) IPurePath {
 	segments = slices.Insert(segments, 0, p.path) // 将当前路径作为第一个元素
 	return NewPureWindowsPath(segments...)
+}
+
+func (p *PureWindowsPath) JoinPath(segments ...IPurePath) IPurePath {
+	strSegments := []string{}
+	for _, seg := range segments {
+		strSegments = append(strSegments, seg.String()) // 获取每个IPurePath的字符串表示
+	}
+	return p.Join(strSegments...) // 调用Join方法
 }
 
 // 将此路径与pattern完全匹配

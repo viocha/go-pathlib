@@ -11,6 +11,7 @@ type IBasePath interface {
 	Parents() []IPath
 	Parent() IPath
 	Join(segments ...string) IPath
+	JoinPath(segments ...IPath) IPath
 
 	WithAnchor(anchor string) (IPath, error)
 	WithName(name string) (IPath, error)
@@ -64,6 +65,14 @@ func (p *BasePath) Parent() IPath {
 func (p *BasePath) Join(segments ...string) IPath {
 	joined := p.IPurePath.Join(segments...)
 	return FromPurePath(joined)
+}
+
+func (p *BasePath) JoinPath(segments ...IPath) IPath {
+	strSegments := []string{}
+	for _, segment := range segments {
+		strSegments = append(strSegments, segment.String())
+	}
+	return p.Join(strSegments...)
 }
 
 func (p *BasePath) WithAnchor(anchor string) (IPath, error) {

@@ -30,7 +30,8 @@ type IPath interface {
 
 	ToURL() (string, error)         // 转换成文件URL，返回 file:// URL 格式，支持UNC路径和本地路径
 	ToAbs() (IPath, error)          // 转换成绝对路径
-	ReadLink() (IPath, error)       // 读取符号链接的目标路径
+	ReadLink() (IPath, error)       // 读取符号链接的目标路径，目标路径不存在也会返回，如果是相对链接的路径，也会原样返回
+	ReadLinkPath() (IPath, error)   // 读取符号链接的目标路径，如果是相对路径，会和链接的路径进行拼接
 	Resolve() (IPath, error)        // 转换成绝对路径，并解析符号链接
 	ToPurePath() purepath.IPurePath // 转换成纯路径对象
 
@@ -77,6 +78,7 @@ type IPath interface {
 	MustToURL() string
 	MustToAbs() IPath
 	MustReadLink() IPath
+	MustReadLinkPath() IPath
 	MustResolve() IPath
 
 	MustStat() os.FileInfo

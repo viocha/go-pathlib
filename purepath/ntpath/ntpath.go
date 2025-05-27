@@ -18,9 +18,18 @@ var (
 	ErrInvalidSuffix = errors.New("invalid suffix provided")
 )
 
-var ReservedNames = []string{"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8",
-	"COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
-var InvalidChars = `<>:/\|?*"`
+var (
+	ReservedNames = []string{"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
+		"COM8",
+		"COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
+	InvalidChars = `<>:/\|?*"`
+)
+
+var (
+	RegUNC       = regexp.MustCompile(`^\\\\[^\\]+\\[^\\]+\\`)
+	RegDrive     = regexp.MustCompile(`(?i)^[A-Z]:\\?`)
+	RegDriveRoot = regexp.MustCompile(`(?i)^[A-Z]:\\`) // 带有盘符和反斜杠的根路径
+)
 
 // Parts 返回路径的各个部分，包括anchor部分，以及剩余的目录和名称部分。
 // 会假定anchor的名称合法，然后使用路径分隔符分割得到目录和名称部分
@@ -31,10 +40,9 @@ func Parts(path string) []string {
 	path = Clean(path) // 先清理路径，确保是标准格式
 
 	// UNC路径
-	regUNC := regexp.MustCompile(`^\\\\[^\\]+\\[^\\]+\\`)
-	if regUNC.MatchString(path) {
+	if strings.HasPrefix(path, `\\`) {
 		// 提取UNC路径的anchor部分
-		anchor := regUNC.FindString(path)
+		anchor := RegUNC.FindString(path)
 		if len(path) == len(anchor) { // 如果只有根路径
 			return []string{anchor}
 		}
@@ -44,10 +52,9 @@ func Parts(path string) []string {
 	}
 
 	// 带盘符路径
-	regDrive := regexp.MustCompile(`(?i)^[A-Z]:\\?`)
-	if regDrive.MatchString(path) {
+	if RegDrive.MatchString(path) {
 		// 提取盘符和冒号，以及可选的反斜杠
-		anchor := regDrive.FindString(path)
+		anchor := RegDrive.FindString(path)
 		var parts []string
 		if len(path) == len(anchor) { // 如果只有盘符
 			return []string{anchor}
@@ -150,11 +157,11 @@ func ValidateAnchor(anchor string) error {
 	anchor = strings.ReplaceAll(anchor, `/`, `\`)
 
 	if strings.HasPrefix(anchor, `\\`) { // UNC路径
-		if !regexp.MustCompile(`^\\\\[^\\]+\\[^\\]+\\$`).MatchString(anchor) {
+		if !RegUNC.MatchString(anchor) {
 			return common.WrapMsg(ErrInvalidAnchor, "invalid UNC anchor %q", anchor)
 		}
 	} else if strings.Contains(anchor, ":") { // 驱动器盘符
-		if !regexp.MustCompile(`(?i)^[A-Z]:\\?$`).MatchString(anchor) {
+		if !RegDrive.MatchString(anchor) {
 			return common.WrapMsg(ErrInvalidAnchor, "invalid drive anchor %q", anchor)
 		}
 	} else if anchor != `\` && anchor != "" { // 其他情况
@@ -233,6 +240,7 @@ func Clean(path string) string {
 	return path
 }
 
+// 支持 ** 通配符的路径匹配函数，UNC也支持，UNC可以看成是第一个部分为空的以斜杠开头的路径
 func Match(pattern, path string) bool {
 	pattern = filepath.ToSlash(pattern)
 	path = filepath.ToSlash(path)

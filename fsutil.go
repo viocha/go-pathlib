@@ -194,7 +194,7 @@ func CopySymlink(src, dst IPath) error {
 	if err := ensureMove(dst, false); err != nil {
 		return err
 	}
-	target, err := src.ReadLink()
+	target, err := src.ReadLinkPath()
 	if err != nil {
 		return err
 	}

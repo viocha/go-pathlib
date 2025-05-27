@@ -615,7 +615,10 @@ func TestWindowsPath_Move(t *testing.T) {
 			if p.Exists(false) {
 				t.Errorf("Original path %s still exists after moving", p.String())
 			}
-			_ = newP.Move(p) // 恢复原路径
+			err = newP.Move(p) // 恢复原路径
+			if err != nil {
+				t.Fatalf("Failed to restore original path: %v", err)
+			}
 		})
 	}
 }
