@@ -173,18 +173,18 @@ func CopyFile(src, dst IPath) error {
 
 	inputFile, err := src.Open()
 	if err != nil {
-		return common.WrapSub(ErrCopyFile, err, "failed to open source file: %q", src)
+		return common.WrapSub(err, ErrCopyFile, "failed to open source file: %q", src)
 	}
 	defer closeFile(inputFile)
 
 	outputFile, err := dst.OpenWrite()
 	if err != nil {
-		return common.WrapSub(ErrCopyFile, err, "failed to open target file: %q", dst)
+		return common.WrapSub(err, ErrCopyFile, "failed to open target file: %q", dst)
 	}
 	defer closeFile(outputFile)
 
 	if _, err = inputFile.WriteTo(outputFile); err != nil {
-		return common.WrapSub(ErrCopyFile, err, "failed to copy file content from %q to %q", src, dst)
+		return common.WrapSub(err, ErrCopyFile, "failed to copy file content from %q to %q", src, dst)
 	}
 	return nil
 }

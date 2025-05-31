@@ -132,7 +132,7 @@ func URLToPath(fileUrl string) (string, error) {
 	// 解析成文件路径
 	u, err := url.Parse(fileUrl)
 	if err != nil {
-		return "", common.WrapSub(ErrParseURL, err, "failed to parse URL: %q", fileUrl)
+		return "", common.WrapSub(err, ErrParseURL, "failed to parse URL: %q", fileUrl)
 	}
 
 	if u.Scheme != "file" {

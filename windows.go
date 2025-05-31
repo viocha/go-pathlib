@@ -55,7 +55,7 @@ func (p WindowsPath) ToPurePath() purepath.IPurePath {
 func (p WindowsPath) ToURL() (string, error) {
 	absPath, err := p.ToAbs()
 	if err != nil {
-		return "", common.WrapSub(ErrToURL, err, "failed to convert to absolute path: %q", p)
+		return "", common.WrapSub(err, ErrToURL, "failed to convert to absolute path: %q", p)
 	}
 	anchor := absPath.Anchor()
 	path := absPath.String()
@@ -78,7 +78,7 @@ func (p WindowsPath) ToURL() (string, error) {
 func (p WindowsPath) ToAbs() (IPath, error) {
 	absPath, err := filepath.Abs(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrToAbs, err, "failed to convert to absolute path: %q", p)
+		return nil, common.WrapSub(err, ErrToAbs, "failed to convert to absolute path: %q", p)
 	}
 	return NewWindowsPath(absPath), nil
 }
@@ -87,7 +87,7 @@ func (p WindowsPath) ToAbs() (IPath, error) {
 func (p WindowsPath) ReadLink() (IPath, error) {
 	target, err := os.Readlink(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrReadLink, err, "failed to read symlink: %q", p)
+		return nil, common.WrapSub(err, ErrReadLink, "failed to read symlink: %q", p)
 	}
 	// 返回一个新的 WindowsPath 实例
 	return NewWindowsPath(target), nil
@@ -139,7 +139,7 @@ func (p WindowsPath) Exists(follow ...bool) bool {
 func (p WindowsPath) Stat() (os.FileInfo, error) {
 	info, err := os.Stat(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrReadStat, err, "failed to read file status: %q", p)
+		return nil, common.WrapSub(err, ErrReadStat, "failed to read file status: %q", p)
 	}
 	return info, nil
 }
@@ -148,7 +148,7 @@ func (p WindowsPath) Stat() (os.FileInfo, error) {
 func (p WindowsPath) Lstat() (os.FileInfo, error) {
 	info, err := os.Lstat(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrReadLstat, err, "failed to read file status without following symlink: %q", p)
+		return nil, common.WrapSub(err, ErrReadLstat, "failed to read file status without following symlink: %q", p)
 	}
 	return info, nil
 }
@@ -202,7 +202,7 @@ func (p WindowsPath) Open(mode ...int) (*os.File, error) {
 	openMode := common.ParseOptional(mode, os.O_RDONLY) // 默认只读方式打开
 	file, err := os.OpenFile(p.String(), openMode, os.ModePerm)
 	if err != nil {
-		return nil, common.WrapSub(ErrOpen, err, "failed to open file %q with mode %d", p, openMode)
+		return nil, common.WrapSub(err, ErrOpen, "failed to open file %q with mode %d", p, openMode)
 	}
 	return file, nil
 }
@@ -221,7 +221,7 @@ func (p WindowsPath) OpenWrite(append ...bool) (*os.File, error) {
 	}
 	file, err := os.OpenFile(p.String(), mode, os.ModePerm)
 	if err != nil {
-		return nil, common.WrapSub(ErrOpen, err, "failed to open file %q for writing with append=%v", p, isAppend)
+		return nil, common.WrapSub(err, ErrOpen, "failed to open file %q for writing with append=%v", p, isAppend)
 	}
 	return file, nil
 }
@@ -233,7 +233,7 @@ func (p WindowsPath) Read(encoding ...string) (string, error) {
 	}
 	content, err := os.ReadFile(p.String())
 	if err != nil {
-		return "", common.WrapSub(ErrRead, err, "failed to read file: %q", p)
+		return "", common.WrapSub(err, ErrRead, "failed to read file: %q", p)
 	}
 	return string(content), nil
 }
@@ -248,7 +248,7 @@ func (p WindowsPath) Write(text string, encoding ...string) error {
 	}
 	err := os.WriteFile(p.String(), []byte(text), os.ModePerm)
 	if err != nil {
-		return common.WrapSub(ErrWrite, err, "failed to write file: %q", p)
+		return common.WrapSub(err, ErrWrite, "failed to write file: %q", p)
 	}
 	return nil
 }
@@ -257,7 +257,7 @@ func (p WindowsPath) Write(text string, encoding ...string) error {
 func (p WindowsPath) ReadBytes() ([]byte, error) {
 	content, err := os.ReadFile(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrRead, err, "failed to read file: %q", p)
+		return nil, common.WrapSub(err, ErrRead, "failed to read file: %q", p)
 	}
 	return content, nil
 }
@@ -269,7 +269,7 @@ func (p WindowsPath) WriteBytes(data []byte) error {
 	}
 	err := os.WriteFile(p.String(), data, os.ModePerm)
 	if err != nil {
-		return common.WrapSub(ErrWrite, err, "failed to write file: %q", p)
+		return common.WrapSub(err, ErrWrite, "failed to write file: %q", p)
 	}
 	return nil
 }
@@ -286,7 +286,7 @@ func (p WindowsPath) Create(parents ...bool) error {
 
 	file, err := os.Create(p.String())
 	if err != nil {
-		return common.WrapSub(ErrCreate, err, "failed to create file: %q", p)
+		return common.WrapSub(err, ErrCreate, "failed to create file: %q", p)
 	}
 	defer closeFile(file)
 	return nil
@@ -299,13 +299,13 @@ func (p WindowsPath) Mkdir(parents ...bool) error {
 	if createParents {
 		err := os.MkdirAll(p.String(), os.ModePerm)
 		if err != nil {
-			return common.WrapSub(ErrMkdir, err, "failed to create directory %q with parents=%v", p, createParents)
+			return common.WrapSub(err, ErrMkdir, "failed to create directory %q with parents=%v", p, createParents)
 		}
 		return nil
 	}
 	err := os.Mkdir(p.String(), os.ModePerm)
 	if err != nil {
-		return common.WrapSub(ErrMkdir, err, "failed to create directory %q without parents=%v", p, createParents)
+		return common.WrapSub(err, ErrMkdir, "failed to create directory %q without parents=%v", p, createParents)
 	}
 	return nil
 }
@@ -322,7 +322,7 @@ func (p WindowsPath) Symlink(target IPath, parents ...bool) error {
 
 	err := os.Symlink(target.String(), p.String())
 	if err != nil {
-		return common.WrapSub(ErrSymlink, err, "failed to create symlink from %q to %q", p, target)
+		return common.WrapSub(err, ErrSymlink, "failed to create symlink from %q to %q", p, target)
 	}
 	return nil
 }
@@ -348,7 +348,7 @@ func (p WindowsPath) EnsureDir() error {
 	}
 	err := p.Mkdir(true) // 创建目录并确保父目录存在
 	if err != nil {
-		return common.WrapSub(ErrEnsureDir, err, "directory : %q", p)
+		return common.WrapSub(err, ErrEnsureDir, "directory : %q", p)
 	}
 	return nil
 }
@@ -364,13 +364,13 @@ func (p WindowsPath) Remove(recursive ...bool) error {
 	if isRecursive {
 		err := os.RemoveAll(p.String()) // 递归删除
 		if err != nil {
-			return common.WrapSub(ErrRemove, err, "failed to remove path %q recursively", p)
+			return common.WrapSub(err, ErrRemove, "failed to remove path %q recursively", p)
 		}
 		return nil // 成功删除
 	} else {
 		err := os.Remove(p.String()) // 非递归删除文件或目录，如果是目录且非空会返回错误
 		if err != nil {
-			return common.WrapSub(ErrRemove, err, "failed to remove path %q non-recursively", p)
+			return common.WrapSub(err, ErrRemove, "failed to remove path %q non-recursively", p)
 		}
 		return nil // 成功删除
 	}
@@ -380,7 +380,7 @@ func (p WindowsPath) Remove(recursive ...bool) error {
 func (p WindowsPath) Rename(newName string, replace ...bool) (IPath, error) {
 	newPath, err := p.WithName(newName)
 	if err != nil {
-		return nil, common.WrapSub(ErrRename, err, "failed to create new path with name %q from %q", newName, p)
+		return nil, common.WrapSub(err, ErrRename, "failed to create new path with name %q from %q", newName, p)
 	}
 	if err := p.Move(newPath, replace...); err != nil {
 		return nil, err
@@ -406,7 +406,7 @@ func (p WindowsPath) Move(dst IPath, replace ...bool) error {
 		}
 	} else if p.IsFile(false) || p.IsDir(false) { // 如果是文件或目录，直接使用 os.Rename 移动文件
 		if err := os.Rename(p.String(), dst.String()); err != nil {
-			return common.WrapSub(ErrMove, err, "failed to move path from %q to %q", p, dst)
+			return common.WrapSub(err, ErrMove, "failed to move path from %q to %q", p, dst)
 		}
 	}
 	return nil
@@ -467,7 +467,7 @@ func (p WindowsPath) MoveMerge(dst IPath, mergeMode ...MergeMode) error {
 func (p WindowsPath) ReadDir() ([]IPath, error) {
 	entries, err := os.ReadDir(p.String())
 	if err != nil {
-		return nil, common.WrapSub(ErrReadDir, err, "failed to read directory: %q", p)
+		return nil, common.WrapSub(err, ErrReadDir, "failed to read directory: %q", p)
 	}
 	var paths []IPath
 	for _, entry := range entries {

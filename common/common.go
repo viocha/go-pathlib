@@ -6,7 +6,7 @@ import (
 )
 
 // 使用parent错误包装一个子错误，并添加格式信息描述父错误
-func WrapSub(parent error, err error, format string, a ...any) error {
+func WrapSub(err error, parent error, format string, a ...any) error {
 	return errors.Join(
 		WrapMsg(parent, format, a...),
 		err,
