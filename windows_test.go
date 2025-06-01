@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/viocha/go-pathlib/common"
+	"github.com/viocha/go-pathlib/internal/common"
 )
 
 func createTestFileTree(base string) error {

@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/viocha/go-pathlib/common"
+	"github.com/viocha/go-pathlib/internal/common"
 	nt "github.com/viocha/go-pathlib/purepath/ntpath"
 )
 

@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/viocha/go-pathlib/common"
+	"github.com/viocha/go-pathlib/internal/common"
 	"github.com/viocha/go-pathlib/purepath"
 	"github.com/viocha/go-pathlib/purepath/ntpath"
 )

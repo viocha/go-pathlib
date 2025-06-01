@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/viocha/go-pathlib/common"
+	"github.com/viocha/go-pathlib/internal/common"
 )
 
 var (
